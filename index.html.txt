@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentalism Prediction</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f4;
+            --text-color: #1a1a1a;
+            --accent-color: #c0392b;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        #branding {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        #card-container {
+            width: 200px;
+            height: 280px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 2px solid #ccc;
+            margin-bottom: 30px;
+        }
+        .card-face {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .card-face.black {
+            color: #1a1a1a;
+        }
+        #prediction-text {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #revealed-name {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        #admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #admin-panel input, #admin-panel select, #admin-panel button {
+            padding: 15px;
+            margin: 10px;
+            font-size: 1.2rem;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 5px;
+            border: none;
+        }
+        #admin-panel button {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body onclick="checkAdminClick()">
+
+    <div id="branding">Magician and Mentalist Aaryan Mandlik</div>
+
+    <div id="card-container">
+        <div id="card-value" class="card-face">K♦</div>
+    </div>
+
+    <div id="prediction-text">Today's Magical Name is</div>
+    <div id="revealed-name">SPECTATOR</div>
+
+    <div id="admin-panel">
+        <h2>Secret Control Panel</h2>
+        <input type="text" id="name-input" placeholder="Enter Spectator Name">
+        <select id="card-select">
+            <option value="A♠">Ace of Spades</option>
+            <option value="K♦" selected>King of Diamonds</option>
+            <option value="Q♥">Queen of Hearts</option>
+            <option value="J♣">Jack of Clubs</option>
+        </select>
+        <button onclick="saveSettings()">Save & Close</button>
+    </div>
+
+    <script>
+        let clickCount = 0;
+        let clickTimer;
+
+        function checkAdminClick() {
+            clickCount++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 500);
+
+            if (clickCount === 3) {
+                document.getElementById('admin-panel').style.display = 'flex';
+                clickCount = 0;
+            }
+        }
+
+        function saveSettings() {
+            const name = document.getElementById('name-input').value;
+            const card = document.getElementById('card-select').value;
+
+            if (name.trim() !== "") {
+                document.getElementById('revealed-name').innerText = name.toUpperCase();
+            }
+            
+            const cardElem = document.getElementById('card-value');
+            cardElem.innerText = card;
+            if (card.includes('♠') || card.includes('♣')) {
+                cardElem.classList.add('black');
+            } else {
+                cardElem.classList.remove('black');
+            }
+
+            document.getElementById('admin-panel').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
