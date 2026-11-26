@@ -1,158 +1,594 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentalism Prediction</title>
-    <style>
-        :root {
-            --bg-color: #f4f4f4;
-            --text-color: #1a1a1a;
-            --accent-color: #c0392b;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        #branding {
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        #card-container {
-            width: 200px;
-            height: 280px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            border: 2px solid #ccc;
-            margin-bottom: 30px;
-        }
-        .card-face {
-            font-size: 4rem;
-            font-weight: bold;
-            color: var(--accent-color);
-        }
-        .card-face.black {
-            color: #1a1a1a;
-        }
-        #prediction-text {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        #revealed-name {
-            font-size: 3rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            color: var(--accent-color);
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        #admin-panel {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        #admin-panel input, #admin-panel select, #admin-panel button {
-            padding: 15px;
-            margin: 10px;
-            font-size: 1.2rem;
-            width: 80%;
-            max-width: 300px;
-            border-radius: 5px;
-            border: none;
-        }
-        #admin-panel button {
-            background-color: var(--accent-color);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mentalism Suite</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #07060d;
+  }
+
+  body {
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: 
+      radial-gradient(1.5px 1.5px at 20% 30%, rgba(212, 175, 55, 0.35), transparent),
+      radial-gradient(1.5px 1.5px at 80% 20%, rgba(212, 175, 55, 0.25), transparent),
+      radial-gradient(2px 2px at 40% 70%, rgba(212, 175, 55, 0.3), transparent),
+      radial-gradient(1.5px 1.5px at 75% 85%, rgba(212, 175, 55, 0.35), transparent),
+      radial-gradient(1px 1px at 55% 45%, rgba(255, 255, 255, 0.2), transparent);
+    z-index: 0;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background: radial-gradient(circle at center, #141221 0%, #07060d 100%);
+    z-index: 1;
+  }
+
+  .screen.active {
+    display: flex;
+  }
+
+  /* SETUP SCREEN */
+  .grid-container {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 10px 0;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .mini-card {
+    aspect-ratio: 2.5 / 3.5;
+    background: #fcfbf9;
+    border-radius: 6px;
+    border: 1px solid #d4d0c8;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    user-select: none;
+  }
+
+  .mini-card.red { color: #c8102e; }
+  .mini-card.black { color: #111111; }
+
+  .mini-card .corner-top {
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    font-family: Georgia, serif;
+  }
+
+  .mini-card .center-suit {
+    font-size: 18px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .mini-card.selected {
+    transform: scale(1.1);
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
+    z-index: 2;
+  }
+
+  .controls-area {
+    width: 100%;
+    max-width: 400px;
+    padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .name-input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    background: rgba(20, 18, 33, 0.9);
+    color: #ffffff;
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+  }
+
+  .ok-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #d4af37 0%, #aa821c 100%);
+    color: #0b0a12;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* TRIGGER SCREEN */
+  #triggerScreen {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .instruction-text {
+    font-size: 24px;
+    color: #f3e5ab;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  }
+
+  .magic-trigger-btn {
+    padding: 20px 40px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #141221;
+    background: linear-gradient(135deg, #fff3b3 0%, #d4af37 50%, #aa821c 100%);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+    transition: transform 0.1s;
+  }
+
+  .magic-trigger-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* REVEAL SCREEN */
+  #revealScreen {
+    justify-content: flex-start;
+    padding-top: 40px;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .pre-reveal-prompt {
+    font-size: 24px;
+    color: #e2d8b3;
+    opacity: 0;
+    transition: opacity 1s ease;
+    min-height: 35px;
+  }
+
+  .pre-reveal-prompt.visible { opacity: 1; }
+
+  .bicycle-card {
+    width: 200px;
+    height: 280px;
+    background: #fcfbf9;
+    border-radius: 14px;
+    border: 1px solid #d8d4cc;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.4);
+    position: relative;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 1s ease, transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .bicycle-card.visible { opacity: 1; transform: scale(1); }
+  .bicycle-card.red { color: #c8102e; }
+  .bicycle-card.black { color: #141414; }
+
+  .card-inner-frame {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-corner {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Georgia, serif;
+    font-weight: bold;
+  }
+
+  .card-corner.top-left { top: 4px; left: 6px; }
+  .card-corner.bottom-right { bottom: 4px; right: 6px; transform: rotate(180deg); }
+
+  .corner-rank { font-size: 24px; line-height: 0.9; }
+  .corner-suit { font-size: 18px; }
+
+  .pip-grid { width: 60%; height: 70%; position: relative; }
+  .pip { position: absolute; font-size: 36px; line-height: 1; transform: translate(-50%, -50%); user-select: none; }
+  .pip.inverted { transform: translate(-50%, -50%) rotate(180deg); }
+  .pip.ace-pip { font-size: 80px; left: 50%; top: 50%; }
+
+  .court-art {
+    width: 70%; height: 76%; border: 1.5px solid currentColor; border-radius: 4px;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 10px;
+  }
+  .court-letter { font-family: Georgia, serif; font-size: 48px; font-weight: bold; line-height: 1; }
+  .court-suit { font-size: 32px; line-height: 1; }
+
+  .name-reveal-box {
+    margin-top: auto;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .typewriter-prompt {
+    font-size: 20px;
+    color: #cfc6a8;
+    min-height: 35px;
+    text-align: center;
+  }
+
+  .dots-loader {
+    font-size: 24px;
+    color: #d4af37;
+    height: 35px;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .dots-loader.visible { opacity: 1; }
+
+  .spectator-name-display {
+    font-size: 42px;
+    font-weight: 800;
+    color: #d4af37;
+    text-transform: uppercase;
+    text-shadow: 0 0 25px rgba(212, 175, 55, 0.7);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 1s, transform 1s;
+    word-break: break-word;
+    text-align: center;
+  }
+  .spectator-name-display.visible { opacity: 1; transform: translateY(0); }
+
+  .footer-branding {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 1s;
+    padding-bottom: 20px;
+  }
+  .footer-branding.visible { opacity: 1; }
+
+  .tap-here-btn {
+    background: transparent;
+    border: 1.5px solid #d4af37;
+    color: #d4af37;
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .branding-content {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .branding-content.active { display: flex; }
+
+  .magic-sign { font-size: 16px; color: #e8d086; font-style: italic; text-align: center; }
+  .magician-name { font-size: 22px; font-weight: 700; color: #ffffff; text-align: center; }
+
+  .social-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    background: rgba(255,255,255,0.05);
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(212,175,55,0.3);
+  }
+  .ig-logo { width: 20px; height: 20px; fill: #d4af37; }
+  .follow-text { font-size: 16px; font-weight: 600; color: #d4af37; }
+</style>
 </head>
-<body onclick="checkAdminClick()">
+<body>
 
-    <div id="branding">Magician and Mentalist Aaryan Mandlik</div>
+<div class="particles"></div>
 
-    <div id="card-container">
-        <div id="card-value" class="card-face">K♦</div>
+<!-- SCREEN 1: SETUP -->
+<div id="setupScreen" class="screen active">
+  <div class="grid-container">
+    <div id="cardGrid" class="card-grid"></div>
+  </div>
+  <div class="controls-area">
+    <input type="text" id="spectatorInput" class="name-input" placeholder="Enter spectator's name">
+    <button id="okBtn" class="ok-btn">OK</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: TRIGGER -->
+<div id="triggerScreen" class="screen">
+  <div class="instruction-text">Tap below to read their mind...</div>
+  <button id="triggerBtn" class="magic-trigger-btn">Tap Here</button>
+</div>
+
+<!-- SCREEN 3: REVEAL -->
+<div id="revealScreen" class="screen">
+  <div id="cardPrompt" class="pre-reveal-prompt"></div>
+  
+  <div id="revealedCard" class="bicycle-card black">
+    <div class="card-inner-frame" id="cardInnerFrame"></div>
+  </div>
+
+  <div class="name-reveal-box">
+    <div id="namePrompt" class="typewriter-prompt"></div>
+    <div id="dotsLoader" class="dots-loader">. . . . .</div>
+    <div id="spectatorNameDisplay" class="spectator-name-display"></div>
+  </div>
+
+  <div id="footerBranding" class="footer-branding">
+    <button id="tapHereBtn" class="tap-here-btn">Tap Here</button>
+    <div id="brandingContent" class="branding-content">
+      <div class="magic-sign">Thank you for watching my mind reading magic trick.</div>
+      <div class="magician-name">My name is Magician Aaryan.</div>
+      <div class="social-container">
+        <svg class="ig-logo" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        <span class="follow-text">Follow Me</span>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div id="prediction-text">Today's Magical Name is</div>
-    <div id="revealed-name">SPECTATOR</div>
+<script>
+  const suits = [
+    { symbol: '♠', name: 'spades', color: 'black' },
+    { symbol: '♥', name: 'hearts', color: 'red' },
+    { symbol: '♣', name: 'clubs', color: 'black' },
+    { symbol: '♦', name: 'diamonds', color: 'red' }
+  ];
+  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-    <div id="admin-panel">
-        <h2>Secret Control Panel</h2>
-        <input type="text" id="name-input" placeholder="Enter Spectator Name">
-        <select id="card-select">
-            <option value="A♠">Ace of Spades</option>
-            <option value="K♦" selected>King of Diamonds</option>
-            <option value="Q♥">Queen of Hearts</option>
-            <option value="J♣">Jack of Clubs</option>
-        </select>
-        <button onclick="saveSettings()">Save & Close</button>
-    </div>
+  let selectedCard = { rank: 'A', suit: suits[0] };
+  let timers = [];
 
-    <script>
-        let clickCount = 0;
-        let clickTimer;
+  const cardGrid = document.getElementById('cardGrid');
+  const spectatorInput = document.getElementById('spectatorInput');
+  const okBtn = document.getElementById('okBtn');
+  const triggerBtn = document.getElementById('triggerBtn');
+  const tapHereBtn = document.getElementById('tapHereBtn');
 
-        function checkAdminClick() {
-            clickCount++;
-            clearTimeout(clickTimer);
-            clickTimer = setTimeout(() => {
-                clickCount = 0;
-            }, 500);
+  const setupScreen = document.getElementById('setupScreen');
+  const triggerScreen = document.getElementById('triggerScreen');
+  const revealScreen = document.getElementById('revealScreen');
 
-            if (clickCount === 3) {
-                document.getElementById('admin-panel').style.display = 'flex';
-                clickCount = 0;
-            }
+  const cardPrompt = document.getElementById('cardPrompt');
+  const revealedCard = document.getElementById('revealedCard');
+  const cardInnerFrame = document.getElementById('cardInnerFrame');
+  const namePrompt = document.getElementById('namePrompt');
+  const dotsLoader = document.getElementById('dotsLoader');
+  const spectatorNameDisplay = document.getElementById('spectatorNameDisplay');
+  const footerBranding = document.getElementById('footerBranding');
+  const brandingContent = document.getElementById('brandingContent');
+
+  function initGrid() {
+    cardGrid.innerHTML = '';
+    suits.forEach((suit) => {
+      ranks.forEach((rank) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `mini-card ${suit.color}`;
+        if (rank === selectedCard.rank && suit.symbol === selectedCard.suit.symbol) {
+          cardEl.classList.add('selected');
         }
+        cardEl.innerHTML = `
+          <div class="corner-top">${rank}${suit.symbol}</div>
+          <div class="center-suit">${suit.symbol}</div>
+        `;
+        cardEl.addEventListener('click', () => {
+          document.querySelectorAll('.mini-card').forEach(c => c.classList.remove('selected'));
+          cardEl.classList.add('selected');
+          selectedCard = { rank, suit };
+        });
+        cardGrid.appendChild(cardEl);
+      });
+    });
+  }
 
-        function saveSettings() {
-            const name = document.getElementById('name-input').value;
-            const card = document.getElementById('card-select').value;
+  const pipLayouts = {
+    '2': [[50, 18, false], [50, 82, true]],
+    '3': [[50, 18, false], [50, 50, false], [50, 82, true]],
+    '4': [[28, 18, false], [72, 18, false], [28, 82, true], [72, 82, true]],
+    '5': [[28, 18, false], [72, 18, false], [50, 50, false], [28, 82, true], [72, 82, true]],
+    '6': [[28, 18, false], [72, 18, false], [28, 50, false], [72, 50, false], [28, 82, true], [72, 82, true]],
+    '7': [[28, 18, false], [72, 18, false], [50, 34, false], [28, 50, false], [72, 50, false], [28, 82, true], [72, 82, true]],
+    '8': [[28, 18, false], [72, 18, false], [50, 34, false], [28, 50, false], [72, 50, false], [50, 66, true], [28, 82, true], [72, 82, true]],
+    '9': [[28, 16, false], [72, 16, false], [28, 39, false], [72, 39, false], [50, 50, false], [28, 61, true], [72, 61, true], [28, 84, true], [72, 84, true]],
+    '10': [[28, 16, false], [72, 16, false], [50, 27, false], [28, 39, false], [72, 39, false], [28, 61, true], [72, 61, true], [50, 73, true], [28, 84, true], [72, 84, true]]
+  };
 
-            if (name.trim() !== "") {
-                document.getElementById('revealed-name').innerText = name.toUpperCase();
-            }
-            
-            const cardElem = document.getElementById('card-value');
-            cardElem.innerText = card;
-            if (card.includes('♠') || card.includes('♣')) {
-                cardElem.classList.add('black');
-            } else {
-                cardElem.classList.remove('black');
-            }
+  function renderBicycleCard(rank, suit) {
+    revealedCard.className = `bicycle-card ${suit.color}`;
+    let centerHTML = '';
+    if (rank === 'A') {
+      centerHTML = `<div class="pip-grid"><div class="pip ace-pip">${suit.symbol}</div></div>`;
+    } else if (['J', 'Q', 'K'].includes(rank)) {
+      centerHTML = `
+        <div class="court-art">
+          <div class="court-suit">${suit.symbol}</div>
+          <div class="court-letter">${rank}</div>
+          <div class="court-suit" style="transform: rotate(180deg);">${suit.symbol}</div>
+        </div>
+      `;
+    } else {
+      const coords = pipLayouts[rank] || [];
+      const pips = coords.map(([x, y, inv]) =>
+        `<div class="pip ${inv ? 'inverted' : ''}" style="left:${x}%; top:${y}%;">${suit.symbol}</div>`
+      ).join('');
+      centerHTML = `<div class="pip-grid">${pips}</div>`;
+    }
 
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+    cardInnerFrame.innerHTML = `
+      <div class="card-corner top-left"><span class="corner-rank">${rank}</span><span class="corner-suit">${suit.symbol}</span></div>
+      ${centerHTML}
+      <div class="card-corner bottom-right"><span class="corner-rank">${rank}</span><span class="corner-suit">${suit.symbol}</span></div>
+    `;
+  }
+
+  function showScreen(screen) {
+    [setupScreen, triggerScreen, revealScreen].forEach(s => s.classList.remove('active'));
+    screen.classList.add('active');
+  }
+
+  function clearAllTimers() {
+    timers.forEach(t => clearTimeout(t));
+    timers = [];
+  }
+
+  function typeText(element, text, speed, callback) {
+    element.textContent = "";
+    let i = 0;
+    function typing() {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+        timers.push(setTimeout(typing, speed));
+      } else if (callback) {
+        callback();
+      }
+    }
+    typing();
+  }
+
+  function setupRevealSequence() {
+    const spectatorName = spectatorInput.value.trim() || 'Aaryan';
+    const firstPromptText = "I think this is your card...";
+    const secondPromptText = "I read your mind once again, and you are thinking of";
+
+    cardPrompt.textContent = "";
+    cardPrompt.classList.remove('visible');
+    revealedCard.classList.remove('visible');
+    namePrompt.textContent = "";
+    dotsLoader.classList.remove('visible');
+    spectatorNameDisplay.classList.remove('visible');
+    footerBranding.classList.remove('visible');
+    brandingContent.classList.remove('active');
+    tapHereBtn.style.display = "inline-block";
+
+    renderBicycleCard(selectedCard.rank, selectedCard.suit);
+    spectatorNameDisplay.textContent = spectatorName;
+
+    showScreen(revealScreen);
+
+    // Step 1: Typewriter for First Prompt
+    timers.push(setTimeout(() => {
+      cardPrompt.classList.add('visible');
+      typeText(cardPrompt, firstPromptText, 50, () => {
+        // Step 2: Show Card after delay
+        timers.push(setTimeout(() => {
+          revealedCard.classList.add('visible');
+        }, 500));
+      });
+    }, 300));
+
+    // Step 3: Show dots loader
+    timers.push(setTimeout(() => {
+      dotsLoader.classList.add('visible');
+    }, 4500));
+
+    // Step 4: Typewriter for Second Prompt
+    timers.push(setTimeout(() => {
+      dotsLoader.classList.remove('visible');
+      typeText(namePrompt, secondPromptText, 50, () => {
+        // Step 5: Reveal Name & Branding
+        timers.push(setTimeout(() => {
+          spectatorNameDisplay.classList.add('visible');
+          timers.push(setTimeout(() => {
+            footerBranding.classList.add('visible');
+          }, 800));
+        }, 500));
+      });
+    }, 8000));
+  }
+
+  okBtn.addEventListener('click', () => {
+    showScreen(triggerScreen);
+  });
+
+  triggerBtn.addEventListener('click', () => {
+    setupRevealSequence();
+  });
+
+  tapHereBtn.addEventListener('click', () => {
+    tapHereBtn.style.display = "none";
+    brandingContent.classList.add('active');
+  });
+
+  let lastTap = 0;
+  revealScreen.addEventListener('click', (e) => {
+    if (e.target.closest('#tapHereBtn') || e.target.closest('.social-container')) return;
+    const now = Date.now();
+    if (now - lastTap < 350) {
+      clearAllTimers();
+      showScreen(setupScreen);
+    }
+    lastTap = now;
+  });
+
+  initGrid();
